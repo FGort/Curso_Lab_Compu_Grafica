@@ -34,7 +34,7 @@ void DoMovement( );
 
 
 // Camera
-Camera camera( glm::vec3( 0.0f, 0.0f, 3.0f ) );
+Camera camera( glm::vec3( 0.0f, 0.0f, 5.0f ) );
 bool keys[1024];
 GLfloat lastX = 400, lastY = 300;
 bool firstMouse = true;
@@ -158,20 +158,20 @@ int main( )
         glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
         shiba.Draw(shader);
 
-        //Modelo de mesa 
-        model = glm::mat4(1);
-        model = glm::translate(model, glm::vec3(-5.0f, -0.4f, 6.0f));
-        model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(0.04f, 0.04f, 0.04f));
-        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        table.Draw(shader);
+        ////Modelo de mesa 
+        //model = glm::mat4(1);
+        //model = glm::translate(model, glm::vec3(-5.0f, -0.4f, 6.0f));
+        //model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        //model = glm::scale(model, glm::vec3(0.04f, 0.04f, 0.04f));
+        //glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        //table.Draw(shader);
 
-        model = glm::mat4(1);
-        model = glm::translate(model, glm::vec3(7.0f, 0.7f, 6.0f));
-        model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(0.9f, 0.9f, 0.9f));
-        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        bench.Draw(shader);
+        //model = glm::mat4(1);
+        //model = glm::translate(model, glm::vec3(7.0f, 0.7f, 6.0f));
+        //model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        //model = glm::scale(model, glm::vec3(0.9f, 0.9f, 0.9f));
+        //glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        //bench.Draw(shader);
 
 
         //Modelo banca 
@@ -301,13 +301,13 @@ int main( )
         glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
         frisbee.Draw(shader);
 
-        //Modelo de juegos de parque 
-        model = glm::mat4(1);
-        model = glm::translate(model, glm::vec3(16.0f, -1.0f, -4.0f));
-        model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, -1.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(1.8f, 1.8f, 1.8f));
-        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        play.Draw(shader);
+        ////Modelo de juegos de parque 
+        //model = glm::mat4(1);
+        //model = glm::translate(model, glm::vec3(16.0f, -1.0f, -4.0f));
+        //model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+        //model = glm::scale(model, glm::vec3(1.8f, 1.8f, 1.8f));
+        //glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        //play.Draw(shader);
         // Swap the buffers
         glfwSwapBuffers( window );
     }
