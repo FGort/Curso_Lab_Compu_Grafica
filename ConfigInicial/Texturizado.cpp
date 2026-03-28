@@ -1,5 +1,5 @@
-//Previo 07				García Ortega Fernanda 
-//Fecha de entrega: 21/03/2026	320301159
+//Practica 07				García Ortega Fernanda 
+//Fecha de entrega: 27/03/2026	320301159
 #include <iostream>
 #include <cmath>
 
@@ -38,6 +38,10 @@ GLfloat lastY = HEIGHT / 2.0;
 bool keys[1024];
 bool firstMouse = true;
 
+
+float rotX = 0.0f;
+float rotY = 0.0f;
+
 // Light attributes
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
@@ -58,7 +62,7 @@ int main()
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Texturizado - Previo 7 - Garcia Ortega Fernanda", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Texturizado - Practica 7 - Garcia Ortega Fernanda", nullptr, nullptr);
 
 	if (nullptr == window)
 	{
@@ -101,21 +105,72 @@ int main()
 	// Set up vertex data (and buffer(s)) and attribute pointers
 	GLfloat vertices[] =
 	{
-		// Positions            // Colors              // Texture Coords
-		-0.5f, -0.5f, 0.0f,    1.0f, 1.0f,1.0f,		1.0f,1.0f,//vertice inferior izq 
-		 0.5f, -0.5f, 0.0f,	   1.0f, 1.0f,1.0f,		0.5f,0.5f,//vertice inferior der
-		 0.5f,  0.5f, 0.0f,    1.0f, 1.0f,1.0f,	    0.0f,0.0f,//vertice superior der
-		-0.5f,  0.5f, 0.0f,    1.0f, 1.0f,1.0f,		0.0f,3.0f,//vertice superior izq
+		//// Positions            // Colors              // Texture Coords
+		//-0.5f, -0.5f, 0.0f,    1.0f, 1.0f,1.0f,		1.0f,1.0f,//vertice inferior izq 
+		// 0.5f, -0.5f, 0.0f,	 1.0f, 1.0f,1.0f,		0.5f,0.5f,//vertice inferior der
+		// 0.5f,  0.5f, 0.0f,    1.0f, 1.0f,1.0f,	    0.0f,0.0f,//vertice superior der
+		//-0.5f,  0.5f, 0.0f,    1.0f, 1.0f,1.0f,		0.0f,3.0f,//vertice superior izq
 
+		//Construcción del cubo con caras de un dado 
+		
+		//Posición 			   Color			    Coordenadas de textura
+				
+		//cara frontal (Numero 2)
+		-0.5f, -0.5f,  0.5f,   1.0f, 1.0f, 1.0f,    0.00f, 0.25f,
+		 0.5f, -0.5f,  0.5f,   1.0f, 1.0f, 1.0f,    0.25f, 0.25f,
+		 0.5f,  0.5f,  0.5f,   1.0f, 1.0f, 1.0f,    0.25f, 0.50f,
+		 0.5f,  0.5f,  0.5f,   1.0f, 1.0f, 1.0f,    0.25f, 0.50f,
+		-0.5f,  0.5f,  0.5f,   1.0f, 1.0f, 1.0f,    0.00f, 0.50f,
+		-0.5f, -0.5f,  0.5f,   1.0f, 1.0f, 1.0f,    0.00f, 0.25f, 
+
+		//cara trasera (Número 5)
+		-0.5f, -0.5f, -0.5f,   1.0f, 1.0f, 1.0f,    0.50f, 0.25f,
+		 0.5f, -0.5f, -0.5f,   1.0f, 1.0f, 1.0f,    0.75f, 0.25f,
+		 0.5f,  0.5f, -0.5f,   1.0f, 1.0f, 1.0f,    0.75f, 0.50f,
+		 0.5f,  0.5f, -0.5f,   1.0f, 1.0f, 1.0f,    0.75f, 0.50f,
+		-0.5f,  0.5f, -0.5f,   1.0f, 1.0f, 1.0f,    0.50f, 0.50f,
+		-0.5f, -0.5f, -0.5f,   1.0f, 1.0f, 1.0f,    0.50f, 0.25f,
+
+		//cara izquierda (Número 3)
+		-0.5f,  0.5f,  0.5f,   1.0f, 1.0f, 1.0f,    0.50f, 0.25f,
+		-0.5f,  0.5f, -0.5f,   1.0f, 1.0f, 1.0f,    0.75f, 0.25f,
+		-0.5f, -0.5f, -0.5f,   1.0f, 1.0f, 1.0f,    0.75f, 0.00f,
+		-0.5f, -0.5f, -0.5f,   1.0f, 1.0f, 1.0f,    0.75f, 0.00f,
+		-0.5f, -0.5f,  0.5f,   1.0f, 1.0f, 1.0f,    0.50f, 0.00f,
+		-0.5f,  0.5f,  0.5f,   1.0f, 1.0f, 1.0f,    0.50f, 0.25f,
+
+		//cara derecha (Número 4)
+		0.5f,  0.5f,  0.5f,    1.0f, 1.0f, 1.0f,     0.50f, 0.75f,
+		0.5f,  0.5f, -0.5f,    1.0f, 1.0f, 1.0f,     0.75f, 0.75f,
+		0.5f, -0.5f, -0.5f,    1.0f, 1.0f, 1.0f,     0.75f, 0.50f,
+		0.5f, -0.5f, -0.5f,    1.0f, 1.0f, 1.0f,     0.75f, 0.50f,
+		0.5f, -0.5f,  0.5f,    1.0f, 1.0f, 1.0f,     0.50f, 0.50f,
+		0.5f,  0.5f,  0.5f,    1.0f, 1.0f, 1.0f,     0.50f, 0.75f,
+
+		//cara superior (Número 1)
+		-0.5f,  0.5f, -0.5f,   1.0f, 1.0f, 1.0f,    0.50f, 0.50f,
+		 0.5f,  0.5f, -0.5f,   1.0f, 1.0f, 1.0f,    0.25f, 0.50f,
+		 0.5f,  0.5f,  0.5f,   1.0f, 1.0f, 1.0f,    0.25f, 0.25f,
+		 0.5f,  0.5f,  0.5f,   1.0f, 1.0f, 1.0f,    0.25f, 0.25f,
+		-0.5f,  0.5f,  0.5f,   1.0f, 1.0f, 1.0f,    0.50f, 0.25f,
+		-0.5f,  0.5f, -0.5f,   1.0f, 1.0f, 1.0f,    0.50f, 0.50f, 
+
+		//cara inferior (Número 6)
+		-0.5f, -0.5f, -0.5f,   1.0f, 1.0f, 1.0f,	1.00f, 0.50f, 	 
+		 0.5f, -0.5f, -0.5f,   1.0f, 1.0f, 1.0f,    0.75f, 0.50f, 
+		 0.5f, -0.5f,  0.5f,   1.0f, 1.0f, 1.0f,    0.75f, 0.25f, 
+		 0.5f, -0.5f,  0.5f,   1.0f, 1.0f, 1.0f,    0.75f, 0.25f,
+		-0.5f, -0.5f,  0.5f,   1.0f, 1.0f, 1.0f,    1.00f, 0.25f,
+		-0.5f, -0.5f, -0.5f,   1.0f, 1.0f, 1.0f,    1.00f, 0.50f,
 		
 	};
 
-	GLuint indices[] =
+	/*GLuint indices[] =
 	{  // Note that we start from 0!
 		0,1,3,
 		1,2,3
 	
-	};
+	};*/
 
 	// First, set the container's VAO (and VBO)
 	GLuint VBO, VAO,EBO;
@@ -127,8 +182,8 @@ int main()
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	// Position attribute
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)0);
@@ -153,13 +208,13 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 	// Diffuse map
-	image = stbi_load("images/iridescent.png", &textureWidth, &textureHeight, &nrChannels,0);
+	image = stbi_load("images/dado.jpg", &textureWidth, &textureHeight, &nrChannels,0);
 	glBindTexture(GL_TEXTURE_2D, texture1);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	if (image)
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	else
@@ -191,7 +246,12 @@ int main()
 		glm::mat4 view;
 		view = camera.GetViewMatrix();
 		glm::mat4 projection = glm::perspective(camera.GetZoom(), (GLfloat)SCREEN_WIDTH / (GLfloat)SCREEN_HEIGHT, 0.1f, 100.0f);
-		glm::mat4 model(1);
+		//glm::mat4 model(1);
+
+		glm::mat4 model(1.0f);
+
+		model = glm::rotate(model, glm::radians(rotX), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(rotY), glm::vec3(0.0f, 1.0f, 0.0f));
 		// Get location objects for the matrices on the lamp shader (these could be different on a different shader)
 		// Get the uniform locations
 		GLint modelLoc = glGetUniformLocation(lampShader.Program, "model");
@@ -208,7 +268,8 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		// Draw the light object (using light's vertex attributes)
 		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 
 		// Swap the screen buffers
@@ -247,6 +308,28 @@ void DoMovement()
 	{
 		camera.ProcessKeyboard(RIGHT, deltaTime);
 	}
+
+	// Rotación del cubo
+	float velocidad = 30.0f * deltaTime;
+
+	if (keys[GLFW_KEY_I])
+		rotX += velocidad;
+
+	if (keys[GLFW_KEY_K])
+		rotX -= velocidad;
+
+	if (keys[GLFW_KEY_J])
+		rotY += velocidad;
+
+	if (keys[GLFW_KEY_L])
+		rotY -= velocidad;
+
+	// Mantener valores en rango
+	if (rotX > 360.0f) rotX -= 360.0f;
+	if (rotX < -360.0f) rotX += 360.0f;
+
+	if (rotY > 360.0f) rotY -= 360.0f;
+	if (rotY < -360.0f) rotY += 360.0f;
 }
 
 // Is called whenever a key is pressed/released via GLFW
