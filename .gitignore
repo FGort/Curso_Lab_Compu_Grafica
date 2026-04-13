@@ -421,3 +421,5 @@ ipch/
 *.VC.db
 *.VC.VC.opendb
 *.ipch
+!*.obj
+
