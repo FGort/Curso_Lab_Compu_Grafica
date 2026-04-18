@@ -24,6 +24,7 @@ newmtl 08___Default
 	Kd 0.5882 0.5882 0.5882
 	Ks 0.0000 0.0000 0.0000
 	Ke 0.5882 0.5882 0.5882
+map_Kd luna.jpg
 
 newmtl Space_Moon
 	Ns 0.0000
@@ -36,8 +37,6 @@ newmtl Space_Moon
 	Kd 0.4392 0.4392 0.4392
 	Ks 0.1800 0.1800 0.1800
 	Ke 1.0000 1.0000 1.0000
-	map_Ka Moon.tga
-	map_Kd Moon.tga
-	map_Ke Map__27_Falloff.tga
-	map_bump -bm 0.5000 Moon.tga
-	map_bump Moon.tga
+
+	map_Kd luna.jpg
+
