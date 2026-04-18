@@ -161,7 +161,7 @@ int main()
 	Shader lightingShader("Shader/lighting.vs", "Shader/lighting.frag");
 	Shader lampShader("Shader/lamp.vs", "Shader/lamp.frag");
 	
-	Model dog((char*)"Models/P6/RedDog.obj");
+	Model dog((char*)"Models/P9/RedDog.obj");
 	Model table((char*)"Models/P6/coffee_table.obj");
 	Model cloud((char*)"Models/P6/Low Poly Clouds.obj");
 	Model grass((char*)"Models/P6/grass.obj");
@@ -250,9 +250,9 @@ int main()
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.specular"), 0.14f, 0.16f, 0.24f);
 
 		////Luna "roja" 
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"), 0.05f, 0.045f, 0.05f);
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.diffuse"), 0.10f, 0.085f, 0.11f);
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.specular"), 0.13f, 0.10f, 0.12f);
+		//glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"), 0.06f, 0.04f, 0.05f);
+		//glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.diffuse"), 0.13f, 0.07f, 0.08f);
+		//glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.specular"), 0.18f, 0.09f, 0.10f);
 
 
 		// Point light 1
@@ -297,7 +297,7 @@ int main()
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].linear"), 0.20f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].quadratic"), 0.12f);
 
-		// Point light 3
+		//// Point light 3
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[2].position"), pointLightPositions[2].x, pointLightPositions[2].y, pointLightPositions[2].z);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[2].ambient"), 0.0f, 0.0f, 0.0f);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[2].diffuse"), 0.0f, 0.0f, 0.0f);
