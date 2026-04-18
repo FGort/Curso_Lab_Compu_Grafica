@@ -1,5 +1,5 @@
 //Previo 10          Fernanda García Ortega 
-//Fecha de entrega: 19/04/2026    320301159
+//Fecha de entrega: 17/04/2026    320301159
 #include <iostream>
 #include <cmath>
 
