@@ -1,5 +1,5 @@
-//Previo 10          Fernanda García Ortega 
-//Fecha de entrega: 17/04/2026    320301159
+//Practica 10          Fernanda García Ortega 
+//Fecha de entrega: 23/04/2026    320301159
 #include <iostream>
 #include <cmath>
 
@@ -20,6 +20,9 @@
 //Load Models
 #include "SOIL2/SOIL2.h"
 
+
+//mover el pivote al perrito y aplicar rotacion, que recorra el entorno y la pelota debe hacer lo mismo pero en direccion contraria y 
+// simular que el perro juega con la pelota,  curvas de animacion: visualizar de manera más comoda el proceso
 
 // Other includes
 #include "Shader.h"
@@ -110,6 +113,23 @@ bool AnimBall2 = false; //Animación de movimiento vertical de pelota
 float posBall = 0.0f; //posición en 'y' de la pelota 
 bool sube = true; //si la pelota sube o baja 
 
+// Variables para animación de la práctica 
+float radio = 2.0f;
+float dogAngulo = 0.0f;
+float ballAngulo = 3.1416f; // opuesto
+float dogX, dogZ;
+float ballX, ballZ;
+bool playAnim = false;
+// golpe
+bool golpe = false;
+float golpeTimer = 0.0f;
+float golpeDuracion = 1.0f;
+float dogY = 0.0f;
+float ballY = 0.0f;
+float animTime = 0.0f;
+float prevDogY = 0.0f;
+float dogTilt = 0.0f;
+
 
 
 
@@ -129,7 +149,7 @@ int main()
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);*/
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Animacion basica  Previo 10  Garcia Ortega Fernanda", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Animacion basica  Practica 10  Garcia Ortega Fernanda", nullptr, nullptr);
 
 	if (nullptr == window)
 	{
@@ -291,22 +311,28 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Piso.Draw(lightingShader);
 
+		//modelo de perro 
 		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(dogX, dogY - 0.05f, dogZ));
+		model = glm::rotate(model, -dogAngulo, glm::vec3(0, 1, 0));
+		model = glm::rotate(model, dogTilt, glm::vec3(1, 0, 0));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 		Dog.Draw(lightingShader);
 
+
+		//modelo de la pelota 
 		model = glm::mat4(1);
-		glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
+		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 1);
-		model = glm::translate(model, glm::vec3(0.0f, posBall, 0.0f));//solo se mueve en Y 
+		model = glm::translate(model, glm::vec3(ballX, ballY, ballZ));
 		model = glm::rotate(model, glm::radians(rotBall), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-	    Ball.Draw(lightingShader); 
-		glDisable(GL_BLEND);  //Desactiva el canal alfa 
-		glBindVertexArray(0);
+		Ball.Draw(lightingShader);
+
+	
+		glDisable(GL_BLEND);
 	
 
 		// Also draw the lamp object, again binding the appropriate shader
@@ -452,6 +478,10 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 	{
 		AnimBall2 = !AnimBall2;
 	}
+	if (keys[GLFW_KEY_O]) //Animación de recorrido con perro jugando
+	{
+		playAnim = !playAnim;
+	}
 }
 void Animation() {
 	if (AnimBall)
@@ -485,7 +515,65 @@ void Animation() {
 		
 	}
 
+	// Animación de recorrido con juego de pelota
+	if (playAnim)
+	{
+		animTime += deltaTime;
+		dogAngulo += 1.5f * deltaTime;
+		ballAngulo -= 1.5f * deltaTime;
+
+		if (dogAngulo > 6.28318f) dogAngulo -= 6.28318f;
+		if (ballAngulo < 0.0f) ballAngulo += 6.28318f;
+
+		dogX = radio * cos(dogAngulo);
+		dogZ = radio * sin(dogAngulo);
+
+		ballX = radio * cos(ballAngulo);
+		ballZ = radio * sin(ballAngulo);
+
+		
+		float distXZ = sqrt(pow(dogX - ballX, 2) + pow(dogZ - ballZ, 2));
+		float distY = fabs(dogY - ballY);
+
+		ballY = 0.5f + 0.5f * sin(animTime * 4.0f);
+
+		if (distXZ < 0.8f && distY < 0.3f && !golpe)
+		{
+			golpe = true;
+			golpeTimer = 0.0f;
+		}
+
+		if (golpe)
+		{
+			golpeTimer += deltaTime;
+			float t = golpeTimer / golpeDuracion;
+
+			if (t > 1.0f)
+			{
+				golpe = false;
+				dogY = 0.0f;
+				dogTilt = 0.0f;
+			}
+			else
+			{
+				dogY = sin(t * 3.1416f) * 0.8f;
+
+				float base = 0.5f + 0.5f * sin(animTime * 4.0f);
+				float impacto = sin(t * 3.1416f) * 1.2f;
+
+				ballY = base + impacto;
+				// inclinación basada en el salto 
+				dogTilt = -cos(t * 3.1416f) * 0.6f;
+			}
+
+		}
+		else
+		{
+			dogTilt = 0.0f;
+		}
+	}
 }
+
 
 void MouseCallback(GLFWwindow *window, double xPos, double yPos)
 {
