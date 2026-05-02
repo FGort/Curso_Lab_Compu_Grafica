@@ -1,5 +1,5 @@
-//Previo 11					Fernanda García Ortega 
-//Fecha de entrega:26/04/2026			 320301159
+//Practica 11					Fernanda García Ortega 
+//Fecha de entrega:01/05/2026				 320301159
 
 #include <iostream>
 #include <cmath>
@@ -113,9 +113,11 @@ float RLegs = 0.0f;
 float head = 0.0f;
 float tail = 0.0f;
 glm::vec3 dogPos (0.0f,0.0f,0.0f);
-float dogRot = 0.0f;
+float dogRoty = 0.0f;
 bool step = false;
 
+int dogState = 0;
+float limRot = 0.0f;
 
 
 // Deltatime
@@ -134,7 +136,7 @@ int main()
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);*/
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Animacion maquina de estados Previo 11 Fernanda Garcia Ortega", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Animacion maquina de estados Practica 11 Fernanda Garcia Ortega", nullptr, nullptr);
 
 	if (nullptr == window)
 	{
@@ -305,12 +307,15 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Piso.Draw(lightingShader);
 
-		model = glm::mat4(1);
+		/*model = glm::mat4(1);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);*/
 		//Body
-		modelTemp= model = glm::translate(model, dogPos);
-		modelTemp= model = glm::rotate(model, glm::radians(dogRot), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, dogPos); // Mueve a la posición actual
+		model = glm::rotate(model, glm::radians(dogRoty), glm::vec3(0.0f, 1.0f, 0.0f)); // Rota todo el cuerpo
+		modelTemp = model; // Guardamos para que patas y cabeza hereden posición y giro
+
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		DogBody.Draw(lightingShader);
 		//Head
@@ -502,58 +507,151 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 		AnimBall = !AnimBall;
 		
 	}
-	if (keys[GLFW_KEY_B])
-	{
+	if (keys[GLFW_KEY_B]) {
 		dogAnim = 1;
-
+	
 	}
 	
 }
+
 void Animation() {
-	if (AnimBall)
-	{
+	// Animación de la pelota
+	if (AnimBall) {
 		rotBall += 0.4f;
-		//printf("%f", rotBall);
 	}
 
-	if (AnimDog)
-	{
-		rotDog -= 0.6f;
-		//printf("%f", rotBall);
+	
+	if (AnimDog) {
+		rotDog -= 0.6f; // Reducido para mayor suavidad
 	}
-	if (dogAnim == 1) { //Walk animation 
-		if (!step) {	//state 1 
-			RLegs += 0.07f;
-			FLegs += 0.07f;
-			head += 0.07f;
-			tail += 0.07f;
 
-			if (RLegs > 15.0f)  //condition
-				step = true;
+	if (dogAnim == 1) {
+		
+		if (!step) {
+			RLegs += 0.1f; 
+			FLegs += 0.1f;
+			head += 0.1f;  
+			tail += 0.1f;
 
-			}
-			else 
-			{
-				RLegs -= 0.07f;
-				FLegs -= 0.07f;
-				head -= 0.07f;
-				tail -= 0.07f;
-
-				if (RLegs < -15.0f)  //condition
-					step = false;
-				
-			}
-		if (dogPos.z < 2.3f) {
-			dogPos.z += 0.001f;
-			}
+			if (RLegs > 15.0f) step = true;
+		}
 		else {
-			dogAnim = 0; 
+			RLegs -= 0.1f;
+			FLegs -= 0.1f;
+			head -= 0.1f;
+			tail -= 0.1f;
+
+			if (RLegs < -15.0f) step = false;
 		}
 
+		
+
+		//  Camina hacia adelante 
+		if (dogState == 0) {
+			if (dogPos.z < 2.2f) {
+				dogPos.z += 0.002f; 
+			}
+			else {
+				dogState = 1;
+				limRot = -90.0f;
+			}
+		}
+		//  Gira a la izquierda
+		else if (dogState == 1) {
+			head = 25.0f; // Inclinación de cabeza
+			if (dogRoty > limRot) {
+				dogRoty -= 0.2f; 
+			}
+			else {
+				dogState = 2;
+			}
+		}
+		//  Camina hacia la izquierda 
+		else if (dogState == 2) {
+			if (dogPos.x > -2.2f) {
+				dogPos.x -= 0.002f;
+			}
+			else {
+				dogState = 3;
+				limRot = -180.0f;
+			}
+		}
+		// Segundo giro al llegar a la esquina 
+		else if (dogState == 3) {
+			head = 25.0f;
+			if (dogRoty > limRot) {
+				dogRoty -= 0.2f;
+			}
+			else {
+				dogState = 4;
+			}
+		}
+		// Camina hacia la siguiente esquina
+		else if (dogState == 4) {
+			if (dogPos.z > -2.2f) {
+				dogPos.z -= 0.002f;
+			}
+			else {
+				dogState = 5;
+				limRot = -270.0f;
+			}
+		}
+		// Tercer giro 
+		else if (dogState == 5) {
+			head = 25.0f;
+			if (dogRoty > limRot) {
+				dogRoty -= 0.2f;
+			}
+			else {
+				dogState = 6;
+			}
+		}
+		// Camina hacia la esquina 
+		else if (dogState == 6) {
+			if (dogPos.x < 2.2f) {
+				dogPos.x += 0.002f;
+			}
+			else {
+				dogState = 7;
+				limRot = -405.0f;
+			}
+		}
+		// Giro hacia el centro 
+		else if (dogState == 7) {
+			head = 25.0f;
+			if (dogRoty > limRot) {
+				dogRoty -= 0.2f;
+			}
+			else {
+				dogState = 8;
+			}
+		}
+		// Camina en diagonal al centro
+		else if (dogState == 8) {
+			if (dogPos.x > 0.0f) {
+				
+				dogPos.x -= 0.0014f;
+				dogPos.z += 0.0014f;
+			}
+			else {
+				dogState = 9;
+				limRot = -360.0f;
+			}
+		}
+		// Reinicia el ciclo 
+		else if (dogState == 9) {
+			if (dogRoty < limRot) {
+				dogRoty += 0.2f;
+			}
+			else {
+				dogState = 0;
+				dogRoty = 0.0f;
+				limRot = 0.0f;
+				dogPos = glm::vec3(0.0f, 0.0f, 0.0f);
+			}
+		}
 	}
-
 }
-
 
 void MouseCallback(GLFWwindow *window, double xPos, double yPos)
 {
