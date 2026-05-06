@@ -1,7 +1,13 @@
-//Previo 12					Fernanda García Ortega 
-//Fecha de entrega: 03/05/2026           320301159
+//Practica 12					Fernanda García Ortega 
+//Fecha de entrega: 06/05/2026           320301159
 #include <iostream>
 #include <cmath>
+
+
+#include <fstream>
+#include <sstream>
+#include <string>
+
 
 // GLEW
 #include <GL/glew.h>
@@ -112,15 +118,15 @@ float RLegR = 0.0f;
 float head = 0.0f;
 float tail = 0.0f;
 float bodyTilt = 0.0f;
+float bodySide = 0.0f;
 
 //KeyFrames
 float dogPosX , dogPosY , dogPosZ  ;
 
-#define MAX_FRAMES 20
+#define MAX_FRAMES 100
 int i_max_steps = 190;
 int i_curr_steps = 0;
 typedef struct _frame {
-	
 	float rotDog;
 	float rotDogInc;
 	float dogPosX;
@@ -129,15 +135,8 @@ typedef struct _frame {
 	float incX;
 	float incY;
 	float incZ;
-
-
-
-
 	float head; 
 	float headInc;
-
-
-
 	//NUEVOS ELEMENTOS 
 	float FLegL = 0.0f;
 	float FLegLInc = 0.0f;
@@ -152,10 +151,12 @@ typedef struct _frame {
 	//perro sentado
 	float bodyTilt = 0.0f;
 	float bodyTiltInc = 0.0f;
-	
+	//"Muertito"
+	float bodySide = 0.0f;
+	float bodySideInc = 0.0f;
 
 
-}FRAME;
+} FRAME;
 
 FRAME KeyFrame[MAX_FRAMES];
 int FrameIndex = 0;			//introducir datos
@@ -181,8 +182,91 @@ void saveFrame(void)
 	KeyFrame[FrameIndex].RLegR = RLegR;
 	KeyFrame[FrameIndex].tail = tail;
 	KeyFrame[FrameIndex].bodyTilt = bodyTilt;
-
+	KeyFrame[FrameIndex].bodySide = bodySide;
 	FrameIndex++;
+}
+
+void saveAnimationJSON() {
+	std::ofstream file("animacion.json");
+
+	file << "{\n";
+	file << "\"frames\": [\n";
+
+	for (int i = 0; i < FrameIndex; i++) {
+		file << "{\n";
+		file << "\"dogPosX\": " << KeyFrame[i].dogPosX << ",\n";
+		file << "\"dogPosY\": " << KeyFrame[i].dogPosY << ",\n";
+		file << "\"dogPosZ\": " << KeyFrame[i].dogPosZ << ",\n";
+		file << "\"rotDog\": " << KeyFrame[i].rotDog << ",\n";
+		file << "\"head\": " << KeyFrame[i].head << ",\n";
+		file << "\"FLegL\": " << KeyFrame[i].FLegL << ",\n";
+		file << "\"FLegR\": " << KeyFrame[i].FLegR << ",\n";
+		file << "\"RLegL\": " << KeyFrame[i].RLegL << ",\n";
+		file << "\"RLegR\": " << KeyFrame[i].RLegR << ",\n";
+		file << "\"tail\": " << KeyFrame[i].tail << ",\n";
+		file << "\"bodyTilt\": " << KeyFrame[i].bodyTilt << ",\n";
+		file << "\"bodySide\": " << KeyFrame[i].bodySide << "\n";
+
+		if (i < FrameIndex - 1)
+			file << "},\n";
+		else
+			file << "}\n";
+	}
+
+	file << "]\n}";
+	file.close();
+
+	printf("Animacion guardada en animacion.json\n");
+}
+void loadAnimationJSON() {
+	std::ifstream file("animacion.json");
+	std::string line;
+	FrameIndex = 0;
+
+	while (getline(file, line)) {
+		if (line.find("dogPosX") != std::string::npos) {
+
+			KeyFrame[FrameIndex].dogPosX = std::stof(line.substr(line.find(":") + 1));
+
+			getline(file, line);
+			KeyFrame[FrameIndex].dogPosY = std::stof(line.substr(line.find(":") + 1));
+
+			getline(file, line);
+			KeyFrame[FrameIndex].dogPosZ = std::stof(line.substr(line.find(":") + 1));
+
+			getline(file, line);
+			KeyFrame[FrameIndex].rotDog = std::stof(line.substr(line.find(":") + 1));
+
+			getline(file, line);
+			KeyFrame[FrameIndex].head = std::stof(line.substr(line.find(":") + 1));
+
+			getline(file, line);
+			KeyFrame[FrameIndex].FLegL = std::stof(line.substr(line.find(":") + 1));
+
+			getline(file, line);
+			KeyFrame[FrameIndex].FLegR = std::stof(line.substr(line.find(":") + 1));
+
+			getline(file, line);
+			KeyFrame[FrameIndex].RLegL = std::stof(line.substr(line.find(":") + 1));
+
+			getline(file, line);
+			KeyFrame[FrameIndex].RLegR = std::stof(line.substr(line.find(":") + 1));
+
+			getline(file, line);
+			KeyFrame[FrameIndex].tail = std::stof(line.substr(line.find(":") + 1));
+
+			getline(file, line);
+			KeyFrame[FrameIndex].bodyTilt = std::stof(line.substr(line.find(":") + 1));
+			
+			getline(file, line);
+			KeyFrame[FrameIndex].bodySide = std::stof(line.substr(line.find(":") + 1));
+
+			FrameIndex++;
+		}
+	}
+
+	file.close();
+	printf("Animacion cargada desde JSON\n");
 }
 
 void resetElements(void)
@@ -199,7 +283,7 @@ void resetElements(void)
 	RLegR = KeyFrame[0].RLegR;
 	tail = KeyFrame[0].tail;
 	bodyTilt = KeyFrame[0].bodyTilt;
-
+	bodySide = KeyFrame[0].bodySide;
 
 	rotDog = KeyFrame[0].rotDog;
 
@@ -220,7 +304,7 @@ void interpolation(void)
 	KeyFrame[playIndex].RLegRInc = (KeyFrame[playIndex + 1].RLegR - KeyFrame[playIndex].RLegR) / i_max_steps;
 	KeyFrame[playIndex].tailInc = (KeyFrame[playIndex + 1].tail - KeyFrame[playIndex].tail) / i_max_steps;
 	KeyFrame[playIndex].bodyTiltInc =(KeyFrame[playIndex + 1].bodyTilt - KeyFrame[playIndex].bodyTilt) / i_max_steps;
-
+	KeyFrame[playIndex].bodySideInc =(KeyFrame[playIndex + 1].bodySide - KeyFrame[playIndex].bodySide) / i_max_steps;
 
 	KeyFrame[playIndex].rotDogInc = (KeyFrame[playIndex + 1].rotDog - KeyFrame[playIndex].rotDog) / i_max_steps;
 
@@ -244,7 +328,7 @@ int main()
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);*/
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Animacion por KeyFrames Previo 12 Fernanda Garcia Ortega", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Animacion por KeyFrames Practica 12 Fernanda Garcia Ortega", nullptr, nullptr);
 
 	if (nullptr == window)
 	{
@@ -306,10 +390,8 @@ int main()
 		KeyFrame[i].incZ = 0;
 		KeyFrame[i].rotDog = 0;
 		KeyFrame[i].rotDogInc = 0;
-
 		KeyFrame[i].head = 0;
 		KeyFrame[i].headInc = 0;
-
 		KeyFrame[i].FLegL = 0;
 		KeyFrame[i].FLegLInc = 0;
 		KeyFrame[i].FLegR = 0;
@@ -322,6 +404,8 @@ int main()
 		KeyFrame[i].tailInc = 0;
 		KeyFrame[i].bodyTilt = 0;
 		KeyFrame[i].bodyTiltInc = 0;
+		KeyFrame[i].bodySide = 0;
+		KeyFrame[i].bodySideInc = 0;
 	}
 
 
@@ -456,13 +540,14 @@ int main()
 		//Body
 		modelTemp= model = glm::translate(model, glm::vec3(dogPosX,dogPosY,dogPosZ));
 		model = glm::rotate(model, glm::radians(bodyTilt), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(bodySide), glm::vec3(0.0f, 0.0f, 1.0f));
 		modelTemp= model = glm::rotate(model, glm::radians(rotDog), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		DogBody.Draw(lightingShader);
 		//Head
 		model = modelTemp;
 		model = glm::translate(model, glm::vec3(0.0f, 0.093f, 0.208f));
-		model = glm::rotate(model, glm::radians(head), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::rotate(model, glm::radians(head), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		HeadDog.Draw(lightingShader);
 		//Tail 
@@ -557,47 +642,47 @@ void DoMovement()
 	// pata frontal izquierda 
 	if (keys[GLFW_KEY_0])
 	{
-		FLegL += 0.5f;
+		FLegL += 0.2f;
 	}
 	if (keys[GLFW_KEY_1])
 	{
-		FLegL -= 0.5f;
+		FLegL -= 0.2f;
 	}
 	// pata frontal derecha 
 	if (keys[GLFW_KEY_6])
 	{
-		FLegR += 0.5f;
+		FLegR += 0.2f;
 	}
 	if (keys[GLFW_KEY_7])
 	{
-		FLegR -= 0.5f;
+		FLegR -= 0.2f;
 	}
 	// pata trasera izquierda 
 	if (keys[GLFW_KEY_8])
 	{
-		RLegL += 0.5f;
+		RLegL += 0.2f;
 	}
 	if (keys[GLFW_KEY_9])
 	{
-		RLegL -= 0.5f;
+		RLegL -= 0.2f;
 	}
 	//pata trasera derecha 
 	if (keys[GLFW_KEY_O])
 	{
-		RLegR += 0.5f;
+		RLegR += 0.2f;
 	}
 	if (keys[GLFW_KEY_P])
 	{
-		RLegR -= 0.5f;
+		RLegR -= 0.2f;
 	}
 	//Cola
 	if (keys[GLFW_KEY_B])
 	{
-		tail += 0.5f;
+		tail += 0.2f;
 	}
 	if (keys[GLFW_KEY_V])
 	{
-		tail -= 0.5f;
+		tail -= 0.2f;
 	}
 
 
@@ -605,13 +690,13 @@ void DoMovement()
 	if (keys[GLFW_KEY_4])
 	{
 
-		head += 1.0f;
+		head += 0.01f;
 
 	}
 	if (keys[GLFW_KEY_5])
 	{
 
-		head -= 1.0f;
+		head -= 0.01f;
 
 	}
 
@@ -660,12 +745,22 @@ void DoMovement()
 	//Inclinacion del cuerpo
 	if (keys[GLFW_KEY_Q])
 	{
-		bodyTilt += 0.5;
+		bodyTilt += 0.2;
 	}
 
 	if (keys[GLFW_KEY_E])
 	{
-		bodyTilt -= 0.5;
+		bodyTilt -= 0.2;
+	}
+
+	//Inclinacion lateral del cuerpo
+	if (keys[GLFW_KEY_Z])
+	{
+		bodySide += 0.2;
+	}
+	if (keys[GLFW_KEY_X])
+	{
+		bodySide -= 0.2;
 	}
 	// Camera controls
 	if (keys[GLFW_KEY_W] || keys[GLFW_KEY_UP])
@@ -733,8 +828,7 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 		if (play == false && (FrameIndex > 1))
 		{
 
-			resetElements();
-			//First Interpolation				
+			resetElements();				
 			interpolation();
 
 			play = true;
@@ -789,6 +883,33 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 			Light1 = glm::vec3(0);//Cuado es solo un valor en los 3 vectores pueden dejar solo una componente
 		}
 	}
+
+	// Guardar animación
+	if (keys[GLFW_KEY_F])
+	{
+		saveAnimationJSON();
+	}
+
+	// Cargar animación
+	if (keys[GLFW_KEY_R])
+	{
+		loadAnimationJSON();
+
+		if (FrameIndex > 1)
+		{
+			resetElements();
+			interpolation();
+			play = true;
+			playIndex = 0;
+			i_curr_steps = 0;
+		}
+	}
+
+	if (keys[GLFW_KEY_C])
+	{
+		FrameIndex = 0;
+		printf("Frames reiniciados\n");
+	}
 	
 	
 }
@@ -796,14 +917,18 @@ void Animation() {
 
 	if (play)
 	{
-		if (i_curr_steps >= i_max_steps) //end of animation between frames?
+		if (i_curr_steps >= i_max_steps) 
 		{
 			playIndex++;
-			if (playIndex > FrameIndex - 2)	//end of total animation?
+			if (playIndex > FrameIndex - 2)
 			{
-				printf("termina anim\n");
 				playIndex = 0;
-				play = false;
+				i_curr_steps = 0;
+
+				// regresar al estado inicial
+				resetElements();
+
+				interpolation();
 			}
 			else //Next frame interpolations
 			{
@@ -818,15 +943,14 @@ void Animation() {
 			dogPosX += KeyFrame[playIndex].incX;
 			dogPosY += KeyFrame[playIndex].incY;
 			dogPosZ += KeyFrame[playIndex].incZ;
-
 			head += KeyFrame[playIndex].headInc;
-
 			FLegL += KeyFrame[playIndex].FLegLInc;
 			FLegR += KeyFrame[playIndex].FLegRInc;
 			RLegL += KeyFrame[playIndex].RLegLInc;
 			RLegR += KeyFrame[playIndex].RLegRInc;
 			tail += KeyFrame[playIndex].tailInc;
 			bodyTilt += KeyFrame[playIndex].bodyTiltInc;
+			bodySide += KeyFrame[playIndex].bodySideInc;
 
 			rotDog += KeyFrame[playIndex].rotDogInc;
 
